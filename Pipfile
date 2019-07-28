@@ -11,6 +11,7 @@ pylint = "*"
 hanziconv = "*"
 click = "*"
 acrawler = "*"
+toml = "*"
 
 [requires]
 python_version = "3.6"
