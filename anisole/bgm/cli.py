@@ -1,5 +1,6 @@
 import click
-from anisole.bgm.dmhy import DMHY
+
+from anisole.bgm.watcher import Watcher
 
 
 @click.group()
@@ -19,13 +20,13 @@ def bgm():
 @click.option("-re", "--regex", help="Regular expression for matching results")
 @click.option("-inc", "--includes", multiple=True, help="Includes specific words")
 @click.option("-exc", "--excludes", multiple=True, help="Excludes specific words")
-@click.option("-p", "--prefers", multiple=True, help="Prefered specific words")
+@click.option("-p", "--prefers", multiple=True, help="Prefers specific words")
 def add(names, keyword, regex, includes, excludes, prefers, uid):
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
     # if not prefers:
     #     prefers = ["#chs", "1080P"]
     for name in names:
-        last_uid = dm.add(
+        last_uid = watcher.add(
             name,
             uid=uid,
             keyword=keyword,
@@ -34,31 +35,31 @@ def add(names, keyword, regex, includes, excludes, prefers, uid):
             excludes=excludes,
             prefers=prefers,
         )
-        dm.last_uid = last_uid
+        watcher.last_uid = last_uid
 
-    dm.save()
+    watcher.save()
 
 
 @bgm.command()
 @click.argument("uidset", nargs=2, type=click.INT)
 def setuid(uidset):
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
     old_uid = uidset[0]
     new_uid = uidset[1]
 
-    jar = dm.jar.content.pop(old_uid, None)
+    jar = watcher.jar.content.pop(old_uid, None)
     if jar:
         click.echo("Change uid from:")
         jar.echo(detailed=False)
         click.echo("\nto")
 
         jar.uid = new_uid
-        dm.jar.store(jar, echo=False)
+        watcher.jar.store(jar, echo=False)
         jar.echo(detailed=False)
         click.echo("")
 
-        dm.last_uid = new_uid
-        dm.save()
+        watcher.last_uid = new_uid
+        watcher.save()
 
 
 @bgm.command()
@@ -95,10 +96,10 @@ def config(
     prefers_clear,
 ):
 
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
     if not uid:
-        uid = dm.last_uid
-    jar = dm.jar.content.pop(uid, None)
+        uid = watcher.last_uid
+    jar = watcher.jar.content.pop(uid, None)
     if jar:
         click.echo("Config from:")
         jar.echo(detailed=1)
@@ -116,30 +117,30 @@ def config(
         jar.exclude(kw=excludes_add, nkw=excludes_remove, clear=excludes_clear)
         jar.prefer(kw=prefers_add, nkw=prefers_remove, clear=prefers_clear)
 
-        dm.jar.store(jar, echo=False)
+        watcher.jar.store(jar, echo=False)
         jar.echo(detailed=1)
         click.echo("")
-        dm.last_uid = uid
+        watcher.last_uid = uid
 
-        dm.save()
+        watcher.save()
 
 
 @bgm.command()
 @click.argument("uid", type=click.INT, required=False)
 @click.option("-a", "--all-update", is_flag=True)
 def update(uid, all_update):
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
     if not uid:
-        uid = dm.last_uid
+        uid = watcher.last_uid
     if all_update:
-        dm.update(uid, all_=all_update)
+        watcher.update(uid, all_=all_update)
     else:
-        dm.update(uid)
+        watcher.update(uid)
 
     click.echo("")
-    if uid in dm.jar.ids:
-        dm.last_uid = uid
-    dm.save()
+    if uid in watcher.jar.ids:
+        watcher.last_uid = uid
+    watcher.save()
 
 
 @bgm.command()
@@ -148,32 +149,32 @@ def ls(simplified):
     detailed = 0
     if simplified:
         detailed = -1
-    dm = DMHY.load_from()
-    dm.jar.list(detailed=detailed)
+    watcher = Watcher.load_from()
+    watcher.jar.list(detailed=detailed)
 
 
 @bgm.command()
 @click.argument("uid", type=click.INT, required=False)
 @click.option("-a", "--all-info", is_flag=True)
 def info(uid, all_info):
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
     if not uid:
-        uid = dm.last_uid
-    jar = dm.jar.content.get(uid, None)
+        uid = watcher.last_uid
+    jar = watcher.jar.content.get(uid, None)
     if jar:
         d = 3 if all_info else 2
         jar.echo(detailed=d)
         click.echo("")
-        dm.last_uid = uid
-        dm.save()
+        watcher.last_uid = uid
+        watcher.save()
 
 
 @bgm.command()
 @click.argument("uids", type=click.INT, nargs=-1)
 def rm(uids):
-    dm = DMHY.load_from()
-    dm.jar.rm(*uids)
-    dm.save()
+    watcher = Watcher.load_from()
+    watcher.jar.rm(*uids)
+    watcher.save()
 
 
 @bgm.command()
@@ -181,52 +182,51 @@ def rm(uids):
 @click.option("-t", "--tag", multiple=True)
 @click.option("-a", "--all-down", is_flag=True)
 def dl(uid, tag, all_down):
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
     if not uid:
-        uid = dm.last_uid
-    if uid in dm.jar.ids:
-        sub = dm.jar.content[uid]
+        uid = watcher.last_uid
+    if uid in watcher.jar.ids:
+        sub = watcher.jar.content[uid]
         sub.download(*tag, all_=all_down)
-        dm.last_uid = sub.uid
-        dm.save()
+        watcher.last_uid = sub.uid
+        watcher.save()
 
 
 @bgm.command()
 @click.argument("uid", nargs=1, required=False)
 @click.argument("tag", nargs=1, required=False)
 def play(uid, tag):
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
 
     stag = None
     if not uid and not tag:
-        uid = dm.last_uid
+        uid = watcher.last_uid
         stag = None
     else:
         if not tag:
             stag = uid
-            uid = dm.last_uid
+            uid = watcher.last_uid
         else:
             uid = int(uid)
             stag = tag
-    if uid in dm.jar.ids:
-        sub = dm.jar.content[uid]
+    if uid in watcher.jar.ids:
+        sub = watcher.jar.content[uid]
         sub.play(stag)
-        dm.last_uid = sub.uid
-        dm.save()
+        watcher.last_uid = sub.uid
+        watcher.save()
 
 
 @bgm.command()
 @click.argument("uid", nargs=1, type=click.INT)
 @click.argument("mark-ep", nargs=1, type=click.INT, required=False)
 def mark(uid, mark_ep):
-    dm = DMHY.load_from()
+    watcher = Watcher.load_from()
     if not mark_ep:
         mark_ep = uid
-        uid = dm.last_uid
+        uid = watcher.last_uid
 
-    if uid in dm.jar.ids:
-        sub = dm.jar.content[uid]
-        sub.marked = mark
+    if uid in watcher.jar.ids:
+        sub = watcher.jar.content[uid]
+        sub.marked = mark_ep
         sub.echo(nl=True)
-        dm.save()
-
+        watcher.save()
