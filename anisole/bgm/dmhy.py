@@ -1,11 +1,8 @@
-import pickle
 import re
-from pathlib import Path
-from typing import List
 
 from acrawler import Crawler, ParselItem, Processors, Request, Response, Task
 
-from anisole.bgm.sub import Sub, SubJar
+from anisole.bgm.sub import Sub
 from anisole.utils import is_chs
 
 
@@ -89,94 +86,3 @@ class DMHYTask(Task):
 
 class DMHYCrawler(Crawler):
     pass
-
-
-class DMHY:
-    wd = Path.home() / ".bgm"
-    fp = wd / "bgm.data"
-
-    def __init__(self):
-        self.jar = SubJar()
-        self.crawler = DMHYCrawler()
-        self.last_uid = None
-
-    @classmethod
-    def load_from(cls, fp=None) -> "DMHY":
-        if fp:
-            cls.fp = Path(fp)
-        fp = cls.fp
-        if fp.is_file():
-            with open(fp, "rb") as f:
-                obj = pickle.load(f)
-                return obj
-        else:
-            return cls()
-
-    def save(self):
-        self.fp.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.fp, "wb") as f:
-            pickle.dump(self, f)
-
-    def add(
-        self,
-        name: str,
-        uid: int = None,
-        keyword: str = None,
-        regex=None,
-        includes: List[str] = None,
-        excludes: List[str] = None,
-        prefers: List[str] = None,
-    ):
-        sub = Sub(
-            name,
-            uid=uid,
-            keyword=keyword,
-            regex=regex,
-            includes=includes,
-            excludes=excludes,
-            prefers=prefers,
-        )
-        uid = self.jar.store(sub)
-        return uid
-
-    def update(self, uid, all_=False):
-        origin_uid = uid
-        if all_:
-            uids = self.jar.ids
-        else:
-            uids = [uid]
-
-        for uid in uids:
-            if uid in self.jar.ids:
-                sub = self.jar.content[uid]
-                sub.links = {}
-                task = DMHYTask(sub)
-                self.crawler.add_task_sync(task)
-        self.crawler.run()
-
-        # collect results
-        items = self.crawler.storage.get("DMHYLink", [])
-        for item in items:
-            uid = item["uid"]
-            sub = self.jar.content[uid]
-            sub.clutter_item(item)
-
-        # print results
-        if all_:
-            for sub in self.jar.content.values():
-                sub.sort()
-                sub.echo(detailed=0, nl=True, dim_on_old=True)
-        else:
-            if origin_uid in self.jar.ids:
-                sub = self.jar.content[origin_uid]
-                sub.sort()
-                sub.echo(detailed=0, nl=True, dim_on_old=True)
-
-    def __getstate__(self):
-        state = self.__dict__
-        state.pop("crawler", None)
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        self.__dict__["crawler"] = DMHYCrawler()

@@ -2,12 +2,12 @@ import re
 import subprocess
 import xmlrpc.client
 from collections import Iterable
-from pathlib import Path
 from typing import Dict, List
 
 import click
 from hanziconv import HanziConv
 
+from anisole import BASE_PATH
 from anisole.utils import all_videos
 
 
@@ -31,7 +31,8 @@ class Sub:
     """A subscription object.
     """
 
-    wd = Path.home() / ".bgm" / "bangumi"
+    wd = BASE_PATH / "bangumi"
+    _fields = ["name", "marked", "keyword", "includes", "excludes", "prefers", "regex"]
 
     def __init__(
         self,
@@ -42,6 +43,7 @@ class Sub:
         includes: List[str] = None,
         excludes: List[str] = None,
         prefers: List[str] = None,
+        **kwargs,
     ):
 
         self._uid = None
@@ -62,7 +64,19 @@ class Sub:
 
         self.links = {}
 
-        self.marked = 0
+        self.marked = kwargs.get("marked", 0)
+
+    @classmethod
+    def load_from(cls, sub_dict: dict, links=None):
+        name = sub_dict.pop("name")
+        obj = cls(name, **sub_dict)
+        obj.links = links or {}
+        return obj
+
+    def dump_to(self):
+        sub_dict = {"uid": self.uid}
+        sub_dict.update({field: self.__dict__[field] for field in self._fields})
+        return sub_dict, self.links
 
     @property
     def uid(self):
@@ -365,3 +379,27 @@ class SubJar:
             else:
                 i += 1
         return i
+
+    @classmethod
+    def load_from(cls, sub_dicts, links_dict):
+        """Load from (a list of sub info, a dictionary of uid->links)"""
+        jar = cls()
+        for sub_dict in sub_dicts:
+            uid = sub_dict["uid"]
+            links = links_dict.pop(uid, {})
+            sub = Sub.load_from(sub_dict, links)
+            jar.content[uid] = sub
+        return jar
+
+    def dump_to(self):
+        """Return (a list of sub info, a dictionary of uid->links)"""
+        links_dict = {}
+        sub_dicts = []
+        for sub in sorted(self.content.values(), key=lambda s: s.uid):
+            sub: Sub
+            uid = sub.uid
+            sub_dict, links = sub.dump_to()
+            sub_dicts.append(sub_dict)
+            links_dict[uid] = links
+
+        return sub_dicts, links_dict
