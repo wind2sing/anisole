@@ -119,7 +119,10 @@ $ bgm config --help
 
 删除 `uid` 为 3 的订阅
 ```bash
-$ bgm rm 3
+$ bgm rm 3    #默认同时清空下载文件
+
+
+$ bgm rm 3 -s #保留已下载文件
 ```
 
 ### 快捷访问

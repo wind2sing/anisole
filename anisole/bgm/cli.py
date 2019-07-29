@@ -137,7 +137,6 @@ def update(uid, all_update):
     else:
         watcher.update(uid)
 
-    click.echo("")
     if uid in watcher.jar.ids:
         watcher.last_uid = uid
     watcher.save()
@@ -171,9 +170,12 @@ def info(uid, all_info):
 
 @bgm.command()
 @click.argument("uids", type=click.INT, nargs=-1)
-def rm(uids):
+@click.option(
+    "-s", "--save-files", is_flag=True, help="Do not remove downloaded files."
+)
+def rm(uids, save_files):
     watcher = Watcher.load_from()
-    watcher.jar.rm(*uids)
+    watcher.jar.rm(*uids, save_files=save_files)
     watcher.save()
 
 
@@ -221,7 +223,7 @@ def play(uid, tag):
 @click.argument("mark-ep", nargs=1, type=click.INT, required=False)
 def mark(uid, mark_ep):
     watcher = Watcher.load_from()
-    if not mark_ep:
+    if mark_ep is None:
         mark_ep = uid
         uid = watcher.last_uid
 

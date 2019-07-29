@@ -2,6 +2,7 @@ import re
 import subprocess
 import xmlrpc.client
 from collections import Iterable
+from shutil import rmtree
 from typing import Dict, List
 
 import click
@@ -363,13 +364,20 @@ class SubJar:
             click.echo("")
         return sub.uid
 
-    def rm(self, *uids: int):
+    def rm(self, *uids: int, save_files=False):
         click.secho("Remove:", fg="red")
         for uid in uids:
             if uid in self.ids:
                 sub = self.content.pop(uid)
                 sub.echo(fg_1="red", detailed=0)
                 click.echo("")
+                if save_files:
+                    new_fp = sub.fp.parent / sub.name
+                    new_fp.mkdir(parents=True, exist_ok=True)
+                    sub.fp.rename(new_fp)
+                    click.echo(f"Downloaded files are moved to {new_fp}.")
+                else:
+                    rmtree(sub.fp)
 
     def _gen_uid(self) -> int:
         i = 1
