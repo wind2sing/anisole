@@ -7,8 +7,6 @@
 - 番剧订阅：关键词、过滤、正则
 - 最新话、已下载、已观看标记
 
-![](images/bgm_ls.png)
-
 ## 使用
 
 查看可用的命令
@@ -133,6 +131,7 @@ $ bgm rm 3 -s #保留已下载文件
 
 ## 计划
 
+- Detailed config
 - Calendar support
 - Web interface
 - Add more data sources

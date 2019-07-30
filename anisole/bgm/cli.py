@@ -127,7 +127,7 @@ def config(
 
 @bgm.command()
 @click.argument("uid", type=click.INT, required=False)
-@click.option("-a", "--all-update", is_flag=True)
+@click.option("-a", "--all-update", is_flag=True, help="Update all subscriptions")
 def update(uid, all_update):
     watcher = Watcher.load_from()
     if not uid:
@@ -143,7 +143,7 @@ def update(uid, all_update):
 
 
 @bgm.command()
-@click.option("-s", "--simplified", is_flag=True)
+@click.option("-s", "--simplified", is_flag=True, help="print in minimal format")
 def ls(simplified):
     detailed = 0
     if simplified:
@@ -154,7 +154,7 @@ def ls(simplified):
 
 @bgm.command()
 @click.argument("uid", type=click.INT, required=False)
-@click.option("-a", "--all-info", is_flag=True)
+@click.option("-a", "--all-info", is_flag=True, help="print detailed information")
 def info(uid, all_info):
     watcher = Watcher.load_from()
     if not uid:
@@ -170,9 +170,7 @@ def info(uid, all_info):
 
 @bgm.command()
 @click.argument("uids", type=click.INT, nargs=-1)
-@click.option(
-    "-s", "--save-files", is_flag=True, help="Do not remove downloaded files."
-)
+@click.option("-s", "--save-files", is_flag=True, help="Do not remove downloaded files")
 def rm(uids, save_files):
     watcher = Watcher.load_from()
     watcher.jar.rm(*uids, save_files=save_files)
