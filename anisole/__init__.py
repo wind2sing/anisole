@@ -1,4 +1,6 @@
+import json
 from pathlib import Path
+
 import toml
 
 BASE_PATH = Path.home() / ".anisole"
@@ -11,6 +13,14 @@ with open(CONFIG_FP, "r") as f:
     CONFIG = toml.load(CONFIG_FP)
 
 
+TOKEN_FP = BASE_PATH / "token.json"
+TOKEN = None
+if TOKEN_FP.exists():
+    try:
+        with open(TOKEN_FP, "r") as f:
+            TOKEN = json.load(f)
+    except json.JSONDecodeError:
+        pass
 
 
 def save_config(config):
