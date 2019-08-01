@@ -32,7 +32,7 @@ class Sub:
     """A subscription object.
     """
 
-    wd = BASE_PATH / "bangumi"
+    wd = BASE_PATH / "downloads"
     _fields = ["name", "marked", "keyword", "includes", "excludes", "prefers", "regex"]
 
     def __init__(

@@ -1,9 +1,8 @@
-import json
 from typing import List
 import pickle
 import toml
 
-from anisole import BASE_PATH, CONFIG, CONFIG_FILE
+from anisole import BASE_PATH, CONFIG, CONFIG_FP
 from anisole.bgm.dmhy import DMHYCrawler, DMHYTask
 from anisole.bgm.sub import Sub, SubJar
 
@@ -43,7 +42,7 @@ class Watcher:
             bgm["sub"] = sub_dicts
         else:
             bgm.pop("sub", None)
-        with open(CONFIG_FILE, "w") as f:
+        with open(CONFIG_FP, "w") as f:
             toml.dump(CONFIG, f)
         with open(self.fp, "wb") as f:
             pickle.dump(links_dict, f)

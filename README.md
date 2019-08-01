@@ -18,7 +18,7 @@ bgm --help
 
 - 工作目录: `user’s home directory` 下的 `.anisole` 文件夹
 - 配置文件： 工作目录下的 `anisole.toml` 文件
-- 下载目录： 工作目录下的 `bangumi` 文件夹
+- 下载目录： 工作目录下的 `downloads` 文件夹
 
 ### 添加订阅
 
