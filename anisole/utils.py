@@ -1,4 +1,5 @@
 from pathlib import Path
+from wcwidth import wcswidth
 
 
 def is_chs(title):
@@ -44,3 +45,47 @@ def all_videos(fp: Path):
     else:
         if is_video(fp):
             yield fp
+
+
+def plen(s):
+    return wcswidth(s)
+
+
+def pcut(s, maxl):
+    length = 0
+    rli = []
+    for char in s:
+        length += wcswidth(char)
+        if length > maxl:
+            break
+        else:
+            rli.append(char)
+    return "".join(rli)
+
+
+def pformat_list(li, each_line=4, name_maxl=30, align=None):
+    if not li:
+        return
+
+    if not align:
+        align = min(max([plen(name) for name in li]) + 2, name_maxl + 2)
+
+    i = 1  # count for each line
+    ft_li = []
+
+    length = len(li)
+    for idx, name in enumerate(li):
+
+        end = i == each_line
+        name = pcut(name, align)
+        space = "" if end else " " * (align - plen(name))
+        ft_li.append(f"{name}{space}")
+
+        if end:
+            if idx != length - 1:
+                ft_li.append("\n")
+                i = 1
+        else:
+            ft_li.append("   ")
+            i += 1
+    return "".join(ft_li)
