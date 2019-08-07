@@ -5,6 +5,7 @@ import toml
 from anisole import BASE_PATH, CONFIG, CONFIG_FP
 from anisole.bgm.dmhy import DMHYCrawler, DMHYTask
 from anisole.bgm.sub import Sub, SubJar
+from anisole.bgm.bangumi import API
 
 
 class Watcher:
@@ -12,9 +13,17 @@ class Watcher:
     fp = wd / "bgmlinks.data"
 
     def __init__(self, jar, crawler, last_uid=None):
-        self.jar = jar
-        self.crawler = crawler
+        self.jar = jar  # Storage of subscriptions
+        self.crawler = crawler  # Crawler for source website
         self.last_uid = last_uid
+
+        self._api = None  # bgm.tv API client
+
+    @property
+    def api(self):
+        if not self._api:
+            self._api = API(watcher=self)
+        return self._api
 
     @classmethod
     def load_from(cls) -> "Watcher":

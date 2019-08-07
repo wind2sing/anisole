@@ -230,3 +230,10 @@ def mark(uid, mark_ep):
         sub.marked = mark_ep
         sub.echo(nl=True)
         watcher.save()
+
+
+# commands for bgm.tv
+@bgm.command()
+def cal():
+    watcher = Watcher.load_from()
+    watcher.api.cal()
