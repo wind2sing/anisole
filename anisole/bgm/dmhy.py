@@ -3,7 +3,7 @@ import re
 from acrawler import Crawler, ParselItem, Processors, Request, Response, Task
 
 from anisole.bgm.sub import Sub
-from anisole.utils import is_chs
+from anisole.utils import is_chs, parse_anime_ep
 
 
 class DMHYLink(ParselItem):
@@ -30,7 +30,7 @@ class DMHYLink(ParselItem):
 
         content["episode"] = -2
         if content["sort"] == 2:
-            content["episode"] = self.get_episode(title)
+            content["episode"] = parse_anime_ep(title)
         elif content["sort"] == 31:
             content["episode"] = -1
 
@@ -40,27 +40,6 @@ class DMHYLink(ParselItem):
             else:
                 title = re.sub(r"^\[.*?\]", "", title).strip()
         content["title_clean"] = title
-
-    @staticmethod
-    def get_episode(text):
-        """Analyze the episode from link's title."""
-        text = text.upper()
-        cleans = ["1080P", "720P", "480P", "BIG5", "MP4"]
-        for c in cleans:
-            text = text.replace(c, "")
-
-        if "合集" in text:
-            return -1
-
-        match = re.search(r"第(\d{1,3})[^季]", text)
-        if match:
-            return int(match.group(1))
-
-        match = re.search(r"[^.S×xX\-0-9](\d{2,3})[ \]】]", text)
-        if match:
-            return int(match.group(1))
-
-        return -2
 
 
 class DMHYTask(Task):
