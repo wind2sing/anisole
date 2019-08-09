@@ -43,7 +43,9 @@ class DMHYLink(ParselItem):
 
     @staticmethod
     def get_episode(text):
-        cleans = ["1080P", "720P", "BIG5", "big5", "1080p", "720p", "MP4", "mp4"]
+        """Analyze the episode from link's title."""
+        text = text.upper()
+        cleans = ["1080P", "720P", "480P", "BIG5", "MP4"]
         for c in cleans:
             text = text.replace(c, "")
 
@@ -54,7 +56,7 @@ class DMHYLink(ParselItem):
         if match:
             return int(match.group(1))
 
-        match = re.search(r"[^.S×x\-0-9](\d{2,3})[ \]】]", text)
+        match = re.search(r"[^.S×xX\-0-9](\d{2,3})[ \]】]", text)
         if match:
             return int(match.group(1))
 
