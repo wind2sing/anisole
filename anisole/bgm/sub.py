@@ -9,7 +9,7 @@ import click
 from hanziconv import HanziConv
 
 from anisole import BASE_PATH
-from anisole.utils import all_videos
+from anisole.utils import all_videos, parse_anime_ep
 
 
 def append_or_extend(li: list, ele, remove=False):
@@ -163,15 +163,14 @@ class Sub:
 
     @property
     def play_dic(self):
-        pl = {}
-        eps = self.links.keys()
-        for ep in eps:
-            path = self.get_fp_by_ep(ep, mkdir=False)
-            if path.exists():
-                files = list(all_videos(path))
-                if files:
-                    pl[ep] = files
-        return pl
+        """Return a dictionary of {episode: List[path]}"""
+        pd = {}
+
+        for f in all_videos(self.fp):
+            ep = parse_anime_ep(f.stem)
+            li = pd.setdefault(ep, [])
+            li.append(f)
+        return {k: v for k, v in sorted(pd.items(), key=lambda x: x[0])}
 
     @property
     def downloaded(self):
@@ -307,6 +306,9 @@ class Sub:
             if self.prefers:
                 click.echo("")
                 click.secho(f"    --prefers: {self.prefers}", nl=False)
+
+            click.echo("")
+            click.secho(f"    --local: {self.fp}", nl=False)
 
             if detailed > 1 and self.links:
                 click.echo("")
