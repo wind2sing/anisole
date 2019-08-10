@@ -26,7 +26,7 @@ def add(names, keyword, regex, includes, excludes, prefers, uid):
     # if not prefers:
     #     prefers = ["#chs", "1080P"]
     for name in names:
-        last_uid = watcher.add(
+        sub = watcher.add(
             name,
             uid=uid,
             keyword=keyword,
@@ -35,7 +35,10 @@ def add(names, keyword, regex, includes, excludes, prefers, uid):
             excludes=excludes,
             prefers=prefers,
         )
-        watcher.last_uid = last_uid
+        watcher.last_uid = sub.uid
+        click.secho("Add:", fg="green")
+        sub.echo(detailed=1)
+        click.echo("")
 
     watcher.save()
 
@@ -54,7 +57,7 @@ def setuid(uidset):
         click.echo("\nto")
 
         jar.uid = new_uid
-        watcher.jar.store(jar, echo=False)
+        watcher.jar.store(jar)
         jar.echo(detailed=False)
         click.echo("")
 
@@ -117,7 +120,7 @@ def config(
         jar.exclude(kw=excludes_add, nkw=excludes_remove, clear=excludes_clear)
         jar.prefer(kw=prefers_add, nkw=prefers_remove, clear=prefers_clear)
 
-        watcher.jar.store(jar, echo=False)
+        watcher.jar.store(jar)
         jar.echo(detailed=1)
         click.echo("")
         watcher.last_uid = uid
@@ -145,11 +148,17 @@ def update(uid, all_update):
 @bgm.command()
 @click.option("-s", "--simplified", is_flag=True, help="print in minimal format")
 def ls(simplified):
-    detailed = 0
-    if simplified:
-        detailed = -1
+    detailed = -1 if simplified else 0
     watcher = Watcher.load_from()
-    watcher.jar.list(detailed=detailed)
+    for jar in sorted(watcher.jar.content.values(), key=lambda j: j.uid):
+        jar.echo(detailed=detailed, dim_on_old=True)
+        if detailed == -1:
+            click.echo(" ", nl=False)
+        else:
+            click.echo("")
+
+    if detailed == -1:
+        click.echo("")
 
 
 @bgm.command()
@@ -172,8 +181,14 @@ def info(uid, all_info):
 @click.argument("uids", type=click.INT, nargs=-1)
 @click.option("-s", "--save-files", is_flag=True, help="Do not remove downloaded files")
 def rm(uids, save_files):
+    click.secho("Remove:", fg="red")
     watcher = Watcher.load_from()
-    watcher.jar.rm(*uids, save_files=save_files)
+    for uid in uids:
+        sub, new_fp = watcher.jar.rm(uid, save_files=save_files)
+        sub.echo(fg_1="red", detailed=0)
+        click.echo("")
+        if new_fp:
+            click.echo(f"Downloaded files are moved to {new_fp}.")
     watcher.save()
 
 
@@ -187,7 +202,10 @@ def dl(uid, tag, all_down):
         uid = watcher.last_uid
     if uid in watcher.jar.ids:
         sub = watcher.jar.content[uid]
-        sub.download(*tag, all_=all_down)
+        results = sub.download(*tag, all_=all_down)
+        for title, path in results:
+            sub.echo(detailed=0)
+            click.secho(f"\n-Downloading...{title} in {path}")
         watcher.last_uid = sub.uid
         watcher.save()
 
@@ -211,7 +229,20 @@ def play(uid, tag):
             stag = tag
     if uid in watcher.jar.ids:
         sub = watcher.jar.content[uid]
-        sub.play(stag)
+        if stag is None:
+            # if no tag, print all playable files
+            sub.echo(detailed=1)
+            click.echo("")
+            for e, files in sub.play_dic.items():
+                click.secho(f"    @{e}:", fg="yellow")
+                for i, f in enumerate(files):
+                    click.secho(f"       {i:<2}{f}")
+        else:
+            f = sub.play(stag)
+            if f:
+                click.secho(f"Play... {f}")
+            else:
+                click.secho(f"Invalid tag: {stag}", fg="red")
         watcher.last_uid = sub.uid
         watcher.save()
 

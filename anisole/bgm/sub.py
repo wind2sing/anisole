@@ -106,15 +106,24 @@ class Sub:
         return self._fp
 
     def download(self, *tag, all_=False):
+        """Download files with aria2.
+
+        Returns:
+            results: a list of Tuple[title, path].
+        """
         s = xmlrpc.client.ServerProxy("http://localhost:6800/rpc")
 
         aria2 = s.aria2
 
+        # temporarily stores a list of (episode, idx)
         eis = []
 
+        # tag defaults to most recen episode
         if not tag:
             ep = max(self.links.keys())
             tag = [str(ep)]
+
+        # parse the tag to eis
         for t in tag:
             li = t.split(":", 1)
             if len(li) == 1:
@@ -123,43 +132,40 @@ class Sub:
             idx = int(li[1])
             eis.append((ep, idx))
 
+        # if downloads all episodes
         if all_:
             eps = [ep for ep, _ in eis]
             for ep in self.links:
                 if ep > 0 and ep not in eps:
                     eis.append((ep, 0))
 
+        results = []
         for ep, idx in eis:
             link = self.links[ep][idx]
             magnet = link["link"]
 
             path = str(self.get_fp_by_ep(ep))
             aria2.addUri("token:", [magnet], {"dir": path})
+            results.append((link["title"], path))
 
-            self.echo(detailed=0)
-            click.secho(f"\n-Downloading...{link['title']} to {path}")
+        return results
 
     def play(self, tag):
-        if tag is None:
-            self.echo(detailed=0)
-            click.echo("")
-            for e, files in self.play_dic.items():
-                click.secho(f"    @{e}:", fg="yellow")
-                for i, f in enumerate(files):
-                    click.secho(f"       {i:<2}{f}")
-        else:
-            li = tag.split(":", 1)
-            if len(li) == 1:
-                li.append("0")
-            ep = int(li[0])
-            idx = int(li[1])
+        """play the video.
+        Returns:
+            f: `Path` or None.
+        """
+        li = tag.split(":", 1)
+        if len(li) == 1:
+            li.append("0")
+        ep = int(li[0])
+        idx = int(li[1])
 
-            if ep in self.play_dic and idx < len(self.play_dic[ep]) and idx >= 0:
-                f = self.play_dic[ep][idx]
-                click.secho(f"Play... {f}")
-                subprocess.run(["open", f], check=True)
-            else:
-                click.secho(f"Invalid tag: {tag}", fg="red")
+        if ep in self.play_dic and 0 <= idx < len(self.play_dic[ep]):
+            f = self.play_dic[ep][idx]
+            subprocess.run(["open", f], check=True)
+            return f
+        return None
 
     @property
     def play_dic(self):
@@ -340,18 +346,8 @@ class SubJar:
     def ids(self) -> set:
         return self.content.keys()
 
-    def list(self, detailed=0):
-        for jar in sorted(self.content.values(), key=lambda j: j.uid):
-            jar.echo(detailed=detailed, dim_on_old=True)
-            if detailed == -1:
-                click.echo(" ", nl=False)
-            else:
-                click.echo("")
-
-        if detailed == -1:
-            click.echo("")
-
-    def store(self, sub: Sub, echo=True):
+    def store(self, sub: Sub) -> Sub:
+        """store the subscription into the Jar. Automatically adjust uid."""
         if isinstance(sub.uid, int) and sub.uid > 0:
             if sub.uid in self.ids:
                 old_sub = self.content[sub.uid]
@@ -360,26 +356,29 @@ class SubJar:
         else:
             sub.uid = self._gen_uid()
         self.content[sub.uid] = sub
-        if echo:
-            click.secho("Add:", fg="green")
-            sub.echo(detailed=1)
-            click.echo("")
-        return sub.uid
+        return sub
 
-    def rm(self, *uids: int, save_files=False):
-        click.secho("Remove:", fg="red")
-        for uid in uids:
-            if uid in self.ids:
-                sub = self.content.pop(uid)
-                sub.echo(fg_1="red", detailed=0)
-                click.echo("")
-                if save_files:
-                    new_fp = sub.fp.parent / sub.name
-                    new_fp.mkdir(parents=True, exist_ok=True)
-                    sub.fp.rename(new_fp)
-                    click.echo(f"Downloaded files are moved to {new_fp}.")
-                else:
-                    rmtree(sub.fp)
+    def rm(self, uid, save_files=False):
+        """remove subscription.
+
+        Args:
+            uid (int):
+            save_files (bool, optional): save downloaded files. Defaults to False.
+
+        Returns:
+            (sub, new_fp): a tuple of deleted subscription and file_path for downloaded
+        """
+        if uid in self.ids:
+            sub = self.content.pop(uid)
+            if save_files:
+                new_fp = sub.fp.parent / sub.name
+                new_fp.mkdir(parents=True, exist_ok=True)
+                sub.fp.rename(new_fp)
+            else:
+                rmtree(sub.fp)
+                new_fp = None
+            return sub, new_fp
+        return False
 
     def _gen_uid(self) -> int:
         i = 1

@@ -75,8 +75,8 @@ class Watcher:
             excludes=excludes,
             prefers=prefers,
         )
-        uid = self.jar.store(sub)
-        return uid
+        sub = self.jar.store(sub)
+        return sub
 
     def update(self, uid, all_=False):
         origin_uid = uid
