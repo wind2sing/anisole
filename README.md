@@ -88,6 +88,7 @@ $ bgm update -a
 ```bash
 $ bgm dl 3 -t 4
 ```
+
 下载最新一集
 ```bash
 $ bgm dl 3
@@ -97,8 +98,14 @@ $ bgm dl 3
 
 播放 `uid` 为 3 的订阅番剧的第四集
 ```bash
-$ bgm play 3 4
+$ bgm play 3 -t 4
 ```
+
+查看 `uid` 为 3 的订阅番剧所有可观看的集数
+```bash
+$ bgm play 3 -l
+```
+
 
 ### 标记番剧
 标记 `uid` 为 3 的订阅番剧的第四集为已阅

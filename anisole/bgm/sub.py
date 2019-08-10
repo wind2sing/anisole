@@ -151,18 +151,22 @@ class Sub:
         return results
 
     def play(self, tag):
-        """play the video.
+        """play the video. If tag is falsy, play the latest episode.
         Returns:
             f: `Path` or None.
         """
+        play_dic = self.play_dic
+        if not tag:
+            ep = max(play_dic.keys())
+            tag = str(ep)
         li = tag.split(":", 1)
         if len(li) == 1:
             li.append("0")
         ep = int(li[0])
         idx = int(li[1])
 
-        if ep in self.play_dic and 0 <= idx < len(self.play_dic[ep]):
-            f = self.play_dic[ep][idx]
+        if ep in play_dic and 0 <= idx < len(play_dic[ep]):
+            f = play_dic[ep][idx]
             subprocess.run(["open", f], check=True)
             return f
         return None

@@ -212,8 +212,9 @@ def dl(uid, tag, all_down):
 
 @bgm.command()
 @click.argument("uid", nargs=1, required=False)
-@click.argument("tag", nargs=1, required=False)
-def play(uid, tag):
+@click.option("-t", "--tag", help="If not provided, play the latest episode")
+@click.option("-l", "--list-all", is_flag=True, help="Print all playable files")
+def play(uid, tag, list_all):
     watcher = Watcher.load_from()
 
     stag = None
@@ -229,8 +230,7 @@ def play(uid, tag):
             stag = tag
     if uid in watcher.jar.ids:
         sub = watcher.jar.content[uid]
-        if stag is None:
-            # if no tag, print all playable files
+        if list_all:
             sub.echo(detailed=1)
             click.echo("")
             for e, files in sub.play_dic.items():
