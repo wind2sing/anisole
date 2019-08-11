@@ -1,6 +1,7 @@
 import click
 
 from anisole.bgm.watcher import Watcher
+from anisole.utils import pfixed
 
 
 @click.group()
@@ -251,7 +252,10 @@ def mark(uid, mark_ep):
     if uid in watcher.jar.ids:
         sub = watcher.jar.content[uid]
         sub.marked = mark_ep
+        if sub.bid:
+            watcher.api.watched_until(sub.bid, mark_ep)
         sub.echo(nl=True)
+        watcher.last_uid = sub.uid
         watcher.save()
 
 
@@ -267,3 +271,35 @@ def auth():
 def cal():
     watcher = Watcher.load_from()
     watcher.api.cal()
+
+
+@bgm.command()
+@click.argument("uid", nargs=1, type=click.INT, required=False)
+def link(uid):
+    watcher = Watcher.load_from()
+    if not uid:
+        uid = watcher.last_uid
+
+    if uid in watcher.jar.ids:
+        p = watcher.api
+        sub = watcher.jar.content[uid]
+        sub.echo(detailed=0)
+        click.echo("\nSearching...")
+        results = p.search(sub.keyword)["list"]
+        for idx, result in enumerate(results):
+            name = result.get("name_cn", "") or result.get("name", "")
+            url = result["url"]
+            text = f"{idx:<4}{pfixed(name,50)} {url}"
+            click.secho(text)
+
+        bidx = click.prompt("Please enter the index integer", type=int)
+        target = results[bidx]
+        bid = target["id"]
+        sub.bid = bid
+        sub.img = target["images"]["large"]
+        p.collection_update(bid)
+        click.secho(f'Link <{sub.name}> to Subject {target["url"]}', fg="green")
+
+        watcher.last_uid = sub.uid
+        watcher.save()
+

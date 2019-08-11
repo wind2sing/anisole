@@ -88,6 +88,15 @@ def pcut(s, maxl):
     return "".join(rli)
 
 
+def pfixed(s, length):
+    slen = plen(s)
+    if slen > length:
+        s = pcut(s, length)
+        slen = length
+
+    return s + " " * (length - slen)
+
+
 def pformat_list(li, each_line=4, name_maxl=30, align=None):
     if not li:
         return
