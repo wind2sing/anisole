@@ -33,7 +33,17 @@ class Sub:
     """
 
     wd = BASE_PATH / "downloads"
-    _fields = ["name", "marked", "keyword", "includes", "excludes", "prefers", "regex"]
+    _fields = [
+        "name",
+        "marked",
+        "keyword",
+        "includes",
+        "excludes",
+        "prefers",
+        "regex",
+        "bid",
+        "img",
+    ]
 
     def __init__(
         self,
@@ -44,6 +54,8 @@ class Sub:
         includes: List[str] = None,
         excludes: List[str] = None,
         prefers: List[str] = None,
+        bid: int = None,
+        img: str = None,
         **kwargs,
     ):
 
@@ -52,6 +64,8 @@ class Sub:
 
         self.name = name
         self.uid = uid
+        self.bid = bid
+        self.img = img
         if not keyword:
             keyword = name
         self.keyword = keyword
@@ -104,6 +118,12 @@ class Sub:
     @property
     def fp(self):
         return self._fp
+
+    @property
+    def bgm_url(self):
+        if self.bid:
+            return f"http://bgm.tv/subject/{self.bid}"
+        return None
 
     def download(self, *tag, all_=False):
         """Download files with aria2.
@@ -290,7 +310,8 @@ class Sub:
         return pass_exc and pass_inc
 
     def echo(self, fg_1="green", detailed=0, nl=False, dim_on_old=False):
-
+        if self.bid:
+            fg_1='cyan'
         if detailed == -1:
             click.secho(f"{self.name}", nl=False)
         else:
@@ -304,6 +325,9 @@ class Sub:
         if detailed > 0:
             click.echo("")
             click.secho(f"    --keyword: {self.keyword}", nl=False)
+            if self.bid:
+                click.echo("")
+                click.secho(f"    --bgm: {self.bgm_url}", nl=False)
             if self.regex:
                 click.echo("")
                 click.secho(f"    --regex: {self.regex.pattern}", nl=False)
