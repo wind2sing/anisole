@@ -1,9 +1,10 @@
 import json
 from urllib.parse import urlencode
 
+import requests
 from aiohttp import ClientSession, web
 
-from anisole import TOKEN_FP
+from anisole import TOKEN, TOKEN_FP
 
 client_id = "bgm11505d350198b7d4e"
 client_secret = "20e87e75077c448a9a2bd7cfa97d15d6"
@@ -35,8 +36,9 @@ async def hello(request):
             text = await r.text()
             info = await r.json()
         if info and "access_token" in info:
+            TOKEN.update(info)
             with open(TOKEN_FP, "w") as f:
-                json.dump(info, f)
+                json.dump(TOKEN, f)
             echo = info
         else:
             echo = Exception(text)
@@ -52,9 +54,44 @@ async def hello(request):
 params_authorize = {"client_id": client_id, "response_type": "code"}
 url_to_go = authorize_url + f"?{urlencode(params_authorize)}"
 
-print(f"---> Please open {url_to_go} in your browser to get access token.")
+
+def run_auth():
+    print(f"---> Please open {url_to_go} in your browser to get access token.")
+    app = web.Application()
+    app.add_routes(routes)
+    web.run_app(app, port=8079)
 
 
-app = web.Application()
-app.add_routes(routes)
-web.run_app(app, port=8079)
+def check_token():
+    if TOKEN and "access_token" in TOKEN:
+        resp = requests.post(
+            "https://bgm.tv/oauth/token_status",
+            data={"access_token": TOKEN["access_token"]},
+        )
+        print(resp.json())
+        if resp.status_code == 200:
+            return True
+        else:
+            return refresh_token()
+    else:
+        run_auth()
+
+
+def refresh_token():
+    print("Refreshing Token...")
+    data = {
+        "grant_type": "refresh_token",
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "refresh_token": TOKEN["refresh_token"],
+        "redirect_uri": redirect_uri,
+    }
+
+    resp = requests.post("https://bgm.tv/oauth/access_token", data=data)
+    info = resp.json()
+    print(info)
+    if info and "access_token" in info:
+        TOKEN.update(info)
+        with open(TOKEN_FP, "w") as f:
+            json.dump(TOKEN, f)
+        return True

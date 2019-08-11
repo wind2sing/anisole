@@ -14,7 +14,7 @@ with open(CONFIG_FP, "r") as f:
 
 
 TOKEN_FP = BASE_PATH / "token.json"
-TOKEN = None
+TOKEN = {}
 if TOKEN_FP.exists():
     try:
         with open(TOKEN_FP, "r") as f:

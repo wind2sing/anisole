@@ -257,6 +257,13 @@ def mark(uid, mark_ep):
 
 # commands for bgm.tv
 @bgm.command()
+def auth():
+    watcher = Watcher.load_from()
+    if watcher.api.auth():
+        click.secho("OK!", fg="green")
+
+
+@bgm.command()
 def cal():
     watcher = Watcher.load_from()
     watcher.api.cal()
