@@ -50,6 +50,42 @@ Options:
   -p, --prefers TEXT     Prefer specific words
 ```
 
+
+
+### 绑定 bgm.tv
+
+搜索绑定 `uid` 为 3 的订阅番剧。
+
+```bash
+$ bgm link 3
+
+3   女高中生的无所事事 (6,6,6)
+Searching...
+0   普通女高中生要做当地偶像                           http://bgm.tv/subject/94236
+1   女高中生的无所事事                                 http://bgm.tv/subject/265708
+2   女子高中生                                         http://bgm.tv/subject/260371
+3   宿舍不日常                                         http://bgm.tv/subject/236566
+4   仙王的日常生活                                     http://bgm.tv/subject/247977
+5   搞姬日常                                           http://bgm.tv/subject/97927
+6   猫咪日常                                           http://bgm.tv/subject/193282
+7   告诉我！辣妹子酱                                   http://bgm.tv/subject/153140
+8   妄想学生会                                         http://bgm.tv/subject/5649
+Please enter the index integer: 1
+Link <女高中生的无所事事> to Subject http://bgm.tv/subject/265708
+```
+
+
+
+如果想在后面的 `mark` 命令中同步更新收视进度，则必须先初始化认证信息。
+
+```bash
+$ bgm auth
+```
+
+
+
+
+
 ### 查看订阅
 
 所有订阅列表
@@ -107,18 +143,27 @@ $ bgm play 3 -l
 ```
 
 
+
 ### 标记番剧
+
 标记 `uid` 为 3 的订阅番剧的第四集为已阅
 ```bash
 $ bgm mark 3 4
 ```
 
+当番剧已经使用 `link` 绑定 `bgm.tv` 的对应条目时，该命令会同步更新网站条目的收视进度。
+
+
+
 ### 修改配置
+
 ```bash
 $ bgm config --help
 ```
 
 直接修改配置文件是更快更方便的选择。
+
+
 
 ### 删除清空
 
