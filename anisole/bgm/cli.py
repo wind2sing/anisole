@@ -211,23 +211,15 @@ def dl(uid, tag, all_down):
 
 
 @bgm.command()
-@click.argument("uid", nargs=1, required=False)
+@click.argument("uid", nargs=1, type=click.INT, required=False)
 @click.option("-t", "--tag", help="If not provided, play the latest episode")
 @click.option("-l", "--list-all", is_flag=True, help="Print all playable files")
 def play(uid, tag, list_all):
     watcher = Watcher.load_from()
 
-    stag = None
-    if not uid and not tag:
+    if not uid:
         uid = watcher.last_uid
-        stag = None
-    else:
-        if not tag:
-            stag = uid
-            uid = watcher.last_uid
-        else:
-            uid = int(uid)
-            stag = tag
+
     if uid in watcher.jar.ids:
         sub = watcher.jar.content[uid]
         if list_all:
@@ -238,11 +230,11 @@ def play(uid, tag, list_all):
                 for i, f in enumerate(files):
                     click.secho(f"       {i:<2}{f}")
         else:
-            f = sub.play(stag)
+            f = sub.play(tag)
             if f:
                 click.secho(f"Play... {f}")
             else:
-                click.secho(f"Invalid tag: {stag}", fg="red")
+                click.secho(f"Invalid tag: {tag}", fg="red")
         watcher.last_uid = sub.uid
         watcher.save()
 
