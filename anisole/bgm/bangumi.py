@@ -1,5 +1,6 @@
 import requests
 import click
+from datetime import date
 
 from anisole import TOKEN
 from anisole.utils import pformat_list
@@ -34,19 +35,32 @@ class API:
         r = requests.get(url)
         weekdays = r.json()
         index = 1
+        today = date.today()
         for weekday in weekdays:
-            click.secho(weekday["weekday"]["cn"], fg="green")
+            if weekday["weekday"]["id"] == today.weekday() + 1:
+                click.secho("-> " + weekday["weekday"]["cn"] + "-" * 12, fg="magenta")
+            else:
+                click.secho(weekday["weekday"]["cn"] + "-" * 15, fg="green")
             items = weekday["items"]
             li = []
             for item in items:
                 name = item["name_cn"] or item["name"]
+                bid = item["id"]
                 if "rating" in item and item["rating"]["total"] >= filter_rating_count:
                     text = f"#{index:<3}{name}"
+                    if self.watcher.jar.get_sub_by_bid(bid):
+                        text = "@" + text
                     # click.secho(text)
                     li.append(text)
                     index += 1
-
-            click.echo(pformat_list(li, align=40))
+            ft_li = pformat_list(li, align=40)
+            for ft in ft_li:
+                if ft.startswith("@"):
+                    ft = ft[1:] + " "
+                    click.secho(ft, nl=False, fg="cyan")
+                else:
+                    click.secho(ft, nl=False)
+            click.echo("\n")
 
     def search(self, keyword, typ=2):
         r = requests.get(f"{API_PREFIX}/search/subject/{keyword}?type={typ}")
@@ -55,6 +69,12 @@ class API:
 
     def auth(self):
         return check_token()
+
+    def subject_info(self, subject_id: int, response_group="small"):
+        r = requests.get(
+            f"{API_PREFIX}/subject/{subject_id}?responseGroup={response_group}"
+        )
+        return r.json()
 
     def collection_update(self, subject_id: int, status="do", action="update"):
         url = f"{API_PREFIX}/collection/{subject_id}/{action}"
