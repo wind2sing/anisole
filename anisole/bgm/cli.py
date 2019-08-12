@@ -171,7 +171,7 @@ def info(uid, all_info):
         uid = watcher.last_uid
     jar = watcher.jar.content.get(uid, None)
     if jar:
-        d = 3 if all_info else 2
+        d = 2 if all_info else 1
         jar.echo(detailed=d)
         click.echo("")
         watcher.last_uid = uid
@@ -234,6 +234,7 @@ def play(uid, tag, list_all):
             f = sub.play(tag)
             if f:
                 click.secho(f"Play... {f}")
+                print(sub.bgm_url)
             else:
                 click.secho(f"Invalid tag: {tag}", fg="red")
         watcher.last_uid = sub.uid
@@ -275,25 +276,32 @@ def cal():
 
 @bgm.command()
 @click.argument("uid", nargs=1, type=click.INT, required=False)
-def link(uid):
+@click.option("-b", "--bid", type=click.INT, help="directly assign the bangumi id")
+def link(uid, bid):
     watcher = Watcher.load_from()
     if not uid:
         uid = watcher.last_uid
 
     if uid in watcher.jar.ids:
-        p = watcher.api
         sub = watcher.jar.content[uid]
-        sub.echo(detailed=0)
-        click.echo("\nSearching...")
-        results = p.search(sub.keyword)["list"]
-        for idx, result in enumerate(results):
-            name = result.get("name_cn", "") or result.get("name", "")
-            url = result["url"]
-            text = f"{idx:<4}{pfixed(name,50)} {url}"
-            click.secho(text)
+        p = watcher.api
+        if bid:
+            target = p.subject_info(bid)
+            if "id" not in target:
+                print(target)
+                return
+        else:
+            sub.echo(detailed=0)
+            click.echo("\nSearching...")
+            results = p.search(sub.keyword)["list"]
+            for idx, result in enumerate(results):
+                name = result.get("name_cn", "") or result.get("name", "")
+                url = result["url"]
+                text = f"{idx:<4}{pfixed(name,50)} {url}"
+                click.secho(text)
 
-        bidx = click.prompt("Please enter the index integer", type=int)
-        target = results[bidx]
+            bidx = click.prompt("Please enter the index integer", type=int)
+            target = results[bidx]
         bid = target["id"]
         sub.bid = bid
         sub.img = target["images"]["large"]
