@@ -122,4 +122,4 @@ def pformat_list(li, each_line=4, name_maxl=30, align=None):
         else:
             ft_li.append("   ")
             i += 1
-    return "".join(ft_li)
+    return ft_li

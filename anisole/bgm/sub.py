@@ -309,7 +309,7 @@ class Sub:
 
         return pass_exc and pass_inc
 
-    def echo(self, fg_1="green", detailed=0, nl=False, dim_on_old=False):
+    def echo(self, fg_1="white", detailed=0, nl=False, dim_on_old=False):
         if self.bid:
             fg_1='cyan'
         if detailed == -1:
@@ -348,19 +348,12 @@ class Sub:
                 click.echo("")
                 click.secho(f"    --links:", nl=False)
                 for episode, li in sorted(self.links.items(), key=lambda x: x[0]):
-                    if detailed == 2:
-                        # echo the prior links
-                        item = li[0]
+                    # echo all links
+                    click.echo("")
+                    click.secho(f"      @{episode}:", fg="yellow", nl=False)
+                    for i, item in enumerate(li):
                         click.echo("")
-                        click.secho(f"      @{episode:<4}", fg="yellow", nl=False)
-                        click.secho(f": {item['title']}", nl=False)
-                    else:
-                        # echo all links
-                        click.echo("")
-                        click.secho(f"      @{episode}:", fg="yellow", nl=False)
-                        for i, item in enumerate(li):
-                            click.echo("")
-                            click.secho(f"       {i:>4} {item['title']}", nl=False)
+                        click.secho(f"       {i:>4} {item['title']}", nl=False)
 
         if nl:
             click.echo("")
@@ -385,6 +378,12 @@ class SubJar:
             sub.uid = self._gen_uid()
         self.content[sub.uid] = sub
         return sub
+
+    def get_sub_by_bid(self, bid:int):
+        for sub in self.content.values():
+            if sub.bid == bid:
+                return sub
+        return None
 
     def rm(self, uid, save_files=False):
         """remove subscription.
