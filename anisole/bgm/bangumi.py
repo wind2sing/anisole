@@ -28,7 +28,10 @@ class API:
     def headers(self):
         if not TOKEN:
             raise TokenNotFound
-        return {"Authorization": f'Bearer {TOKEN.get("access_token")}'}
+        return {
+            "Authorization": f'Bearer {TOKEN.get("access_token")}',
+            "Accept": "application/json",
+        }
 
     def cal(self, filter_rating_count=10):
         url = f"{API_PREFIX}/calendar"

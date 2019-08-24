@@ -64,15 +64,16 @@ def run_auth():
 
 def check_token():
     if TOKEN and "access_token" in TOKEN:
-        resp = requests.post(
-            "https://bgm.tv/oauth/token_status",
-            data={"access_token": TOKEN["access_token"]},
-        )
-        print(resp.json())
-        if resp.status_code == 200:
-            return True
-        else:
-            return refresh_token()
+        # resp = requests.post(
+        #     "https://bgm.tv/oauth/token_status",
+        #     data={"access_token": TOKEN["access_token"]},
+        # )
+        # print(resp.json())
+        # if resp.status_code == 200:
+        #     return True
+        # else:
+        #     return refresh_token()
+        refresh_token()
     else:
         run_auth()
 
