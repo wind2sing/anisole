@@ -16,22 +16,22 @@ class DMHYLink(ParselItem):
         "title": ["[.title > a ::text]", "".join, x.strip()],
     }
 
-    def custom_process(self, content):
-        content["chs"] = is_chs(content["title"])
-        title = content["title"]
+    def custom_process(self):
+        self["chs"] = is_chs(self["title"])
+        title = self["title"]
 
-        content["episode"] = -2
-        if content["sort"] == 2:
-            content["episode"] = parse_anime_ep(title)
-        elif content["sort"] == 31:
-            content["episode"] = -1
+        self["episode"] = -2
+        if self["sort"] == 2:
+            self["episode"] = parse_anime_ep(title)
+        elif self["sort"] == 31:
+            self["episode"] = -1
 
-        if content["tag"] != "其它":
+        if self["tag"] != "其它":
             if title.startswith("【"):
                 title = re.sub(r"^【.*?】", "", title).strip()
             else:
                 title = re.sub(r"^\[.*?\]", "", title).strip()
-        content["title_clean"] = title
+        self["title_clean"] = title
 
 
 class DMHYTask(Task):
