@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 import requests
 from aiohttp import ClientSession, web
 
-from anisole import TOKEN, TOKEN_FP
+from anisole import TOKEN, TOKEN_FP, CONFIG
 
 client_id = "bgm11505d350198b7d4e"
 client_secret = "20e87e75077c448a9a2bd7cfa97d15d6"
@@ -64,16 +64,16 @@ def run_auth():
 
 def check_token():
     if TOKEN and "access_token" in TOKEN:
-        # resp = requests.post(
-        #     "https://bgm.tv/oauth/token_status",
-        #     data={"access_token": TOKEN["access_token"]},
-        # )
-        # print(resp.json())
-        # if resp.status_code == 200:
-        #     return True
-        # else:
-        #     return refresh_token()
-        refresh_token()
+        resp = requests.post(
+            "https://bgm.tv/oauth/token_status",
+            data={"access_token": TOKEN["access_token"]},
+            headers={"User-Agent": CONFIG["User-Agent"]},
+        )
+        print(resp.text)
+        if resp.status_code == 200:
+            return True
+        else:
+            return refresh_token()
     else:
         run_auth()
 
@@ -88,9 +88,13 @@ def refresh_token():
         "redirect_uri": redirect_uri,
     }
 
-    resp = requests.post("https://bgm.tv/oauth/access_token", data=data)
+    resp = requests.post(
+        "https://bgm.tv/oauth/access_token",
+        data=data,
+        headers={"User-Agent": CONFIG["User-Agent"]},
+    )
+    print(resp.text)
     info = resp.json()
-    print(info)
     if info and "access_token" in info:
         TOKEN.update(info)
         with open(TOKEN_FP, "w") as f:

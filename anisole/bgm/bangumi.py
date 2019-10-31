@@ -31,11 +31,12 @@ class API:
         return {
             "Authorization": f'Bearer {TOKEN.get("access_token")}',
             "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36",
         }
 
     def cal(self, filter_rating_count=10):
         url = f"{API_PREFIX}/calendar"
-        r = requests.get(url)
+        r = requests.get(url, headers=self.headers)
         weekdays = r.json()
         index = 1
         today = date.today()
@@ -66,7 +67,9 @@ class API:
             click.echo("\n")
 
     def search(self, keyword, typ=2):
-        r = requests.get(f"{API_PREFIX}/search/subject/{keyword}?type={typ}")
+        r = requests.get(
+            f"{API_PREFIX}/search/subject/{keyword}?type={typ}", headers=self.headers
+        )
         r.raise_for_status()
         return r.json()
 
@@ -75,7 +78,8 @@ class API:
 
     def subject_info(self, subject_id: int, response_group="small"):
         r = requests.get(
-            f"{API_PREFIX}/subject/{subject_id}?responseGroup={response_group}"
+            f"{API_PREFIX}/subject/{subject_id}?responseGroup={response_group}",
+            headers=self.headers,
         )
         return r.json()
 
@@ -90,10 +94,10 @@ class API:
     def watched_until(self, subject_id: int, watched_eps: int):
         url = f"{API_PREFIX}/subject/{subject_id}/update/watched_eps"
         r = requests.post(url, headers=self.headers, data={"watched_eps": watched_eps})
-
+        print(r.text)
         if r.status_code == 200:
             if r.json()["code"] == 202:
                 return True
-        print(r.text)
+
         raise BadAPIRequest(url)
 
