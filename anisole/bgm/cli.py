@@ -274,23 +274,19 @@ def cal():
     watcher.api.cal()
 
 
+# @bgm.command()
+# @click.argument("uid", nargs=1, type=click.INT, required=False)
+# @click.option("-b", "--bid", type=click.INT, help="directly assign the bangumi id")
 @bgm.command()
-@click.argument("uid", nargs=1, type=click.INT, required=False)
-@click.option("-b", "--bid", type=click.INT, help="directly assign the bangumi id")
-def link(uid, bid):
+@click.argument("uids", type=click.INT, nargs=-1, required=False)
+def link(uids):
     watcher = Watcher.load_from()
-    if not uid:
-        uid = watcher.last_uid
-
-    if uid in watcher.jar.ids:
-        sub = watcher.jar.content[uid]
-        p = watcher.api
-        if bid:
-            target = p.subject_info(bid)
-            if "id" not in target:
-                print(target)
-                return
-        else:
+    if not uids:
+        uids = [watcher.last_uid]
+    for uid in uids:
+        if uid in watcher.jar.ids:
+            sub = watcher.jar.content[uid]
+            p = watcher.api
             sub.echo(detailed=0)
             click.echo("\nSearching...")
             results = p.search(sub.keyword)["list"]
@@ -302,12 +298,13 @@ def link(uid, bid):
 
             bidx = click.prompt("Please enter the index integer", type=int)
             target = results[bidx]
-        bid = target["id"]
-        sub.bid = bid
-        sub.img = target["images"]["large"]
-        p.collection_update(bid)
-        click.secho(f'Link <{sub.name}> to Subject {target["url"]}', fg="green")
+            bid = target["id"]
+            sub.bid = bid
+            sub.img = target["images"]["large"]
+            p.collection_update(bid)
+            click.secho(f'Link <{sub.name}> to Subject {target["url"]}', fg="green")
 
-        watcher.last_uid = sub.uid
+    if uids:
+        watcher.last_uid = uids[0]
         watcher.save()
 
