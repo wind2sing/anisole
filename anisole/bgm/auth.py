@@ -100,3 +100,5 @@ def refresh_token():
         with open(TOKEN_FP, "w") as f:
             json.dump(TOKEN, f)
         return True
+    else:
+        run_auth()

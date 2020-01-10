@@ -185,11 +185,12 @@ def rm(uids, save_files):
     click.secho("Remove:", fg="red")
     watcher = Watcher.load_from()
     for uid in uids:
-        sub, new_fp = watcher.jar.rm(uid, save_files=save_files)
-        sub.echo(fg_1="red", detailed=0)
-        click.echo("")
-        if new_fp:
-            click.echo(f"Downloaded files are moved to {new_fp}.")
+        if uid in watcher.jar.ids:
+            sub, new_fp = watcher.jar.rm(uid, save_files=save_files)
+            sub.echo(fg_1="red", detailed=0)
+            click.echo("")
+            if new_fp:
+                click.echo(f"Downloaded files are moved to {new_fp}.")
     watcher.save()
 
 
