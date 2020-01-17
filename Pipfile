@@ -12,6 +12,7 @@ hanziconv = "*"
 click = "*"
 acrawler = "*"
 toml = "*"
+parselx = "*"
 
 [requires]
 python_version = "3.6"

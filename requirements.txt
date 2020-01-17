@@ -2,3 +2,4 @@ hanziconv
 click
 acrawler
 toml
+parselx
