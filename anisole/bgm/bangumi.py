@@ -66,9 +66,10 @@ class API:
                     click.secho(ft, nl=False)
             click.echo("\n")
 
-    def search(self, keyword, typ=2):
+    def search(self, keyword, typ=2, page=1, max_results=25):
         r = requests.get(
-            f"{API_PREFIX}/search/subject/{keyword}?type={typ}", headers=self.headers
+            f"{API_PREFIX}/search/subject/{keyword}?type={typ}&max_results={max_results}&start={0+(page-1)*max_results}",
+            headers=self.headers,
         )
         r.raise_for_status()
         return r.json()

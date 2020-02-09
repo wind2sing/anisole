@@ -290,15 +290,26 @@ def link(uids):
             p = watcher.api
             sub.echo(detailed=0)
             click.echo("\nSearching...")
-            results = p.search(sub.keyword)["list"]
-            for idx, result in enumerate(results):
-                name = result.get("name_cn", "") or result.get("name", "")
-                url = result["url"]
-                text = f"{idx:<4}{pfixed(name,50)} {url}"
-                click.secho(text)
 
-            bidx = click.prompt("Please enter the index integer", type=int)
-            target = results[bidx]
+            bidx = 0
+            page = 0
+            while bidx == 0:
+                page += 1
+                results = p.search(sub.keyword, page=page)["list"]
+                for idx, result in enumerate(results):
+                    name = result.get("name_cn", "") or result.get("name", "")
+                    url = result["url"]
+                    text = f"{idx+1:<4}{pfixed(name,50)} {url}"
+                    click.secho(text)
+
+                bidx = click.prompt(
+                    "Please enter the index integer(0 for next page)", type=int
+                )
+
+            target = results[bidx - 1]
+
+            if click.confirm(f"Change name to {target['name']} ?"):
+                sub.name = target["name"]
             bid = target["id"]
             sub.bid = bid
             sub.img = target["images"]["large"]
