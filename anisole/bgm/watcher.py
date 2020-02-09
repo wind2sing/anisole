@@ -104,9 +104,9 @@ class Watcher:
         if all_:
             for sub in self.jar.content.values():
                 sub.sort()
-                sub.echo(detailed=0, nl=True, dim_on_old=True, last_uid=self.last_uid)
+                sub.echo(detailed=0, nl=True, dim_on_old=True)
         else:
             if origin_uid in self.jar.ids:
                 sub = self.jar.content[origin_uid]
                 sub.sort()
-                sub.echo(detailed=0, nl=True, dim_on_old=True, last_uid=self.last_uid)
+                sub.echo(detailed=0, nl=True, dim_on_old=True)

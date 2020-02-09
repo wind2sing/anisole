@@ -319,7 +319,7 @@ class Sub:
 
         return pass_exc and pass_inc
 
-    def echo(self, fg_1="white", detailed=0, nl=False, dim_on_old=False, last_uid=None):
+    def echo(self, fg_1="white", detailed=0, nl=False, dim_on_old=False):
         if self.bid:
             fg_1 = "cyan"
         if detailed == -1:
@@ -330,7 +330,6 @@ class Sub:
                 f"{self.uid:<4}{self.name} ({self.episoded},{self.downloaded},{self.marked})",
                 fg=fg_1,
                 nl=False,
-                reverse=self.uid == last_uid,
                 dim=(not new) and dim_on_old,
             )
         if detailed > 0:
