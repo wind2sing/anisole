@@ -32,9 +32,8 @@ class Sub:
     """A subscription object.
     """
 
-    wd = BASE_PATH / "downloads"
+    wd = BASE_PATH / "anime"
     _fields = [
-        "name",
         "marked",
         "keyword",
         "includes",
@@ -61,6 +60,7 @@ class Sub:
 
         self._uid = None
         self._fp = None
+        self._name = name
 
         self.name = name
         self.uid = uid
@@ -89,9 +89,27 @@ class Sub:
         return obj
 
     def dump_to(self):
-        sub_dict = {"uid": self.uid}
+        sub_dict = {"uid": self.uid, "name": self.name}
         sub_dict.update({field: self.__dict__[field] for field in self._fields})
         return sub_dict, self.links
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, val):
+        if val and isinstance(val, str):
+            self._name = val
+
+            new_fp = self.wd / val
+            old_fp = self._fp
+
+            if old_fp:
+                old_fp.rename(new_fp)
+            else:
+                new_fp.mkdir(parents=True, exist_ok=True)
+            self._fp = new_fp
 
     @property
     def uid(self):
@@ -104,14 +122,6 @@ class Sub:
             return
         if isinstance(val, int) and val > 0:
             self._uid = val
-            new_fp = self.wd / str(val)
-            old_fp = self._fp
-
-            if old_fp:
-                old_fp.rename(new_fp)
-            else:
-                new_fp.mkdir(parents=True, exist_ok=True)
-            self._fp = new_fp
         else:
             raise ValueError("UID should be a positive integer!")
 
@@ -311,7 +321,7 @@ class Sub:
 
     def echo(self, fg_1="white", detailed=0, nl=False, dim_on_old=False):
         if self.bid:
-            fg_1='cyan'
+            fg_1 = "cyan"
         if detailed == -1:
             click.secho(f"{self.name}", nl=False)
         else:
@@ -379,7 +389,7 @@ class SubJar:
         self.content[sub.uid] = sub
         return sub
 
-    def get_sub_by_bid(self, bid:int):
+    def get_sub_by_bid(self, bid: int):
         for sub in self.content.values():
             if sub.bid == bid:
                 return sub
