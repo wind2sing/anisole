@@ -152,7 +152,7 @@ def ls(simplified):
     detailed = -1 if simplified else 0
     watcher = Watcher.load_from()
     for jar in sorted(watcher.jar.content.values(), key=lambda j: j.uid):
-        jar.echo(detailed=detailed, dim_on_old=True)
+        jar.echo(detailed=detailed, dim_on_old=True, last_uid=watcher.last_uid)
         if detailed == -1:
             click.echo(" ", nl=False)
         else:
