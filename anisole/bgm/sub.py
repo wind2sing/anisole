@@ -9,7 +9,7 @@ import click
 from hanziconv import HanziConv
 
 from anisole import BASE_PATH
-from anisole.utils import all_videos, parse_anime_ep
+from anisole.utils import all_videos, parse_anime_ep, parse_eps_list
 
 
 def append_or_extend(li: list, ele, remove=False):
@@ -135,7 +135,7 @@ class Sub:
             return f"http://bgm.tv/subject/{self.bid}"
         return None
 
-    def download(self, *tag, all_=False):
+    def download(self, tag_str, all_=False):
         """Download files with aria2.
 
         Returns:
@@ -148,18 +148,12 @@ class Sub:
         # temporarily stores a list of (episode, idx)
         eis = []
 
-        # tag defaults to most recen episode
-        if not tag:
+        # tag defaults to most recent episode
+        if not tag_str:
             ep = max(self.links.keys())
-            tag = [str(ep)]
+            tag_str = str(ep)
 
-        # parse the tag to eis
-        for t in tag:
-            li = t.split(":", 1)
-            if len(li) == 1:
-                li.append("0")
-            ep = int(li[0])
-            idx = int(li[1])
+        for ep, idx in parse_eps_list(tag_str):
             eis.append((ep, idx))
 
         # if downloads all episodes
@@ -174,7 +168,8 @@ class Sub:
             link = self.links[ep][idx]
             magnet = link["link"]
 
-            path = str(self.get_fp_by_ep(ep))
+            # path = str(self.get_fp_by_ep(ep))
+            path = str(self.fp)
             aria2.addUri("token:", [magnet], {"dir": path})
             results.append((link["title"], path))
 
@@ -352,15 +347,18 @@ class Sub:
                 click.secho(f"    --prefers: {self.prefers}", nl=False)
 
             click.echo("")
-            click.secho(f"    --local: {self.fp}", nl=False)
+            click.secho(f'    --local: "{self.fp}"', nl=False)
 
             if detailed > 1 and self.links:
                 click.echo("")
                 click.secho(f"    --links:", nl=False)
-                for episode, li in sorted(self.links.items(), key=lambda x: x[0]):
+                for episode, li in sorted(
+                    self.links.items(), key=lambda x: x[0], reverse=True
+                ):
                     # echo all links
                     click.echo("")
-                    click.secho(f"      @{episode}:", fg="yellow", nl=False)
+                    extra_str = "(合集)" if episode == -1 else ""
+                    click.secho(f"      @{episode}{extra_str}:", fg="yellow", nl=False)
                     for i, item in enumerate(li):
                         click.echo("")
                         click.secho(f"       {i:>4} {item['title']}", nl=False)

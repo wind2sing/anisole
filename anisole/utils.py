@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
-
+from itertools import chain
+from collections import defaultdict
 from wcwidth import wcswidth
 
 _EP_PATTERNS = [
@@ -123,3 +124,47 @@ def pformat_list(li, each_line=4, name_maxl=30, align=None):
             ft_li.append("   ")
             i += 1
     return ft_li
+
+
+def _collapse_range(ranges):
+    end = None
+    for value in ranges:
+        yield range(max(end, value.start), max(value.stop, end)) if end else value
+        end = max(end, value.stop) if end else value.stop
+
+
+def _split_range(value: str):
+    m = re.match(r"(.*)@(\d+)$", value)
+    post = 0
+    if m:
+        post = int(m.group(2))
+        value = m.group(1)
+    value = value.split("-")
+    for val, prev in zip(value, chain((None,), value)):
+        if val != "":
+            val = int(val)
+            if prev == "":
+                val *= -1
+            yield [val, post]
+
+
+def _parse_range(r):
+    if len(r) == 0:
+        return []
+    parts = [*_split_range(r)]
+    if len(parts) > 2:
+        raise ValueError("Invalid range: {}".format(r))
+
+    left, post = parts[0]
+    (right, post) = parts[-1]
+    return range(left, right + 1), post
+
+
+def parse_eps_list(rl):
+
+    res = {}
+    for x in rl.split(","):
+        rg, post = _parse_range(x)
+        for i in rg:
+            res[i] = post
+    return sorted([*res.items()], key=lambda v: v[0])

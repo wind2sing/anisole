@@ -198,15 +198,15 @@ def rm(uids, save_files):
 
 @bgm.command()
 @click.argument("uid", type=click.INT, required=False)
-@click.option("-t", "--tag", multiple=True)
+@click.option("-t", "--tags")
 @click.option("-a", "--all-down", is_flag=True)
-def dl(uid, tag, all_down):
+def dl(uid, tags, all_down):
     watcher = Watcher.load_from()
     if not uid:
         uid = watcher.last_uid
     if uid in watcher.jar.ids:
         sub = watcher.jar.content[uid]
-        results = sub.download(*tag, all_=all_down)
+        results = sub.download(tags, all_=all_down)
         for title, path in results:
             sub.echo(detailed=0)
             click.secho(f"\n-Downloading...{title} in {path}")
@@ -321,4 +321,3 @@ def link(uids):
     if uids:
         watcher.last_uid = uids[0]
         watcher.save()
-
