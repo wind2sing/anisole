@@ -134,7 +134,7 @@ def _collapse_range(ranges):
 
 
 def _split_range(value: str):
-    m = re.match(r"(.*)@(\d+)$", value)
+    m = re.match(r"(.*):(\d+)$", value)
     post = 0
     if m:
         post = int(m.group(2))
