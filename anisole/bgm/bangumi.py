@@ -51,7 +51,7 @@ class API:
                 name = item["name_cn"] or item["name"]
                 bid = item["id"]
                 if "rating" in item and item["rating"]["total"] >= filter_rating_count:
-                    text = f"#{index:<3}{name}"
+                    text = f"#{index:<3}{name[:12]} {item['rating']['score']}"
                     if self.watcher.jar.get_sub_by_bid(bid):
                         text = "@" + text
                     # click.secho(text)
@@ -72,7 +72,14 @@ class API:
             headers=self.headers,
         )
         r.raise_for_status()
-        return r.json()
+        try:
+            res = r.json()
+            if "list" in res:
+                return res["list"]
+            else:
+                return []
+        except Exception as e:
+            return []
 
     def auth(self):
         return check_token()
@@ -101,4 +108,3 @@ class API:
                 return True
 
         raise BadAPIRequest(url)
-

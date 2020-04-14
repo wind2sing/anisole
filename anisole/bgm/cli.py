@@ -297,7 +297,10 @@ def link(uids):
             page = 0
             while bidx == 0:
                 page += 1
-                results = p.search(sub.keyword, page=page)["list"]
+                results = p.search(sub.keyword, page=page)
+                if not results:
+                    print("No results!")
+                    return
                 for idx, result in enumerate(results):
                     name = result.get("name_cn", "") or result.get("name", "")
                     url = result["url"]
