@@ -4,8 +4,7 @@ from setuptools import setup, find_packages
 NAME = "anisole"
 DESCRIPTION = "Anime management all in one."
 URL = "https://github.com/wooddance/anisole"
-EMAIL = "zireael.me@gmail.com"
-AUTHOR = "wooddance"
+AUTHOR = "wind2sing"
 VERSION = "0.0.1"
 
 setup(
