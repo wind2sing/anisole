@@ -22,6 +22,7 @@ async def hello(request):
     try:
         code = request.query["code"]
         async with ClientSession() as session:
+            print(f"Getting code {code}")
             r = await session.request(
                 "POST",
                 access_token_url,
@@ -34,6 +35,7 @@ async def hello(request):
                 },
             )
             text = await r.text()
+            print(text)
             info = await r.json()
         if info and "access_token" in info:
             TOKEN.update(info)
@@ -41,8 +43,10 @@ async def hello(request):
                 json.dump(TOKEN, f)
             echo = info
         else:
+            print(text)
             echo = Exception(text)
     except Exception as e:
+        print(e)
         echo = e
 
     if isinstance(echo, Exception):
@@ -97,6 +101,7 @@ def refresh_token():
     info = resp.json()
     if info and "access_token" in info:
         TOKEN.update(info)
+        print(info)
         with open(TOKEN_FP, "w") as f:
             json.dump(TOKEN, f)
         return True

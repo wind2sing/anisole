@@ -99,7 +99,16 @@ class API:
         print(r.text)
         raise BadAPIRequest(url)
 
+    def ep_info(self, subject_id: int, watched_eps: int):
+        url = f"{API_PREFIX}/subject/{subject_id}/ep"
+        r = requests.get(url, headers=self.headers)
+        data = r.json()["eps"][watched_eps - 1]
+        return data
+
     def watched_until(self, subject_id: int, watched_eps: int):
+        data = self.ep_info(subject_id, watched_eps)
+        id_ = data["id"]
+        print(data["url"], data["name"], data["airdate"])
         url = f"{API_PREFIX}/subject/{subject_id}/update/watched_eps"
         r = requests.post(url, headers=self.headers, data={"watched_eps": watched_eps})
         print(r.text)

@@ -4,6 +4,7 @@ import xmlrpc.client
 from collections import Iterable
 from shutil import rmtree
 from typing import Dict, List
+from urllib.parse import quote
 
 import click
 from hanziconv import HanziConv
@@ -182,8 +183,9 @@ class Sub:
         """
         play_dic = self.play_dic
         if not tag:
-            ep = max(play_dic.keys())
-            tag = str(ep)
+            # ep = max(play_dic.keys())
+            # tag = str(ep)
+            tag = str(self.marked + 1)
         li = tag.split(":", 1)
         if len(li) == 1:
             li.append("0")
@@ -193,8 +195,8 @@ class Sub:
         if ep in play_dic and 0 <= idx < len(play_dic[ep]):
             f = play_dic[ep][idx]
             subprocess.run(["open", f], check=True)
-            return f
-        return None
+            return [f, ep, idx]
+        return [None, None, None]
 
     @property
     def play_dic(self):
@@ -348,6 +350,11 @@ class Sub:
 
             click.echo("")
             click.secho(f'    --local: "{self.fp}"', nl=False)
+            url = "https://share.dmhy.org/topics/list/page/1?keyword={}&sort_id=2&team_id=0&order=date-desc".format(
+                quote(self.keyword)
+            )
+            click.echo("")
+            click.secho(f'    --dmhy: "{url}"', nl=False)
 
             if detailed > 1 and self.links:
                 click.echo("")

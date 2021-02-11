@@ -234,10 +234,14 @@ def play(uid, tag, list_all):
                 for i, f in enumerate(files):
                     click.secho(f"       {i:<2}{f}")
         else:
-            f = sub.play(tag)
+            f, ep, idx = sub.play(tag)
             if f:
-                click.secho(f"Play... {f}")
-                print(sub.bgm_url)
+                click.secho(f"Play {ep}... {f}")
+                click.secho(sub.bgm_url)
+                data = watcher.api.ep_info(sub.bid, ep)
+                click.secho(
+                    f'{data["url"]}  {data["name"]}  {data["airdate"]}', fg="green"
+                )
             else:
                 click.secho(f"Invalid tag: {tag}", fg="red")
         watcher.last_uid = sub.uid
@@ -257,7 +261,10 @@ def mark(uid, mark_ep):
         sub = watcher.jar.content[uid]
         sub.marked = mark_ep
         if sub.bid:
-            watcher.api.watched_until(sub.bid, mark_ep)
+            try:
+                watcher.api.watched_until(sub.bid, mark_ep)
+            except Exception as e:
+                print(e)
         sub.echo(nl=True)
         watcher.last_uid = sub.uid
         watcher.save()
