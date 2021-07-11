@@ -19,6 +19,9 @@ def parse_anime_ep(text):
 
     if "合集" in text:
         return -1
+    
+    if "[OP]" in text or "[ED]" in text:
+        return -2
 
     for pattern in _EP_PATTERNS:
         match = pattern.search(text)

@@ -12,6 +12,7 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     author=AUTHOR,
     url=URL,
     python_requires=">=3.6.0",
