@@ -5,7 +5,7 @@ NAME = "anisole"
 DESCRIPTION = "Anime management all in one."
 URL = "https://github.com/wooddance/anisole"
 AUTHOR = "wind2sing"
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 setup(
     name=NAME,
