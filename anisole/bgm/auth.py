@@ -35,12 +35,13 @@ async def hello(request):
                 },
             )
             text = await r.text()
-            print(text)
+            print('Body from posting access token url:', text)
             info = await r.json()
         if info and "access_token" in info:
             TOKEN.update(info)
             with open(TOKEN_FP, "w") as f:
                 json.dump(TOKEN, f)
+            print('Save token:', info)
             echo = info
         else:
             print(text)

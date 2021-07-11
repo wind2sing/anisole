@@ -3,3 +3,5 @@ click
 acrawler
 toml
 parselx
+wcwidth
+requests

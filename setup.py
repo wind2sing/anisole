@@ -13,7 +13,6 @@ setup(
     description=DESCRIPTION,
     long_description=open("README.md").read(),
     author=AUTHOR,
-    author_email=EMAIL,
     url=URL,
     python_requires=">=3.6.0",
     install_requires=open("requirements.txt").read().splitlines(),
