@@ -68,7 +68,7 @@ def setuid(uidset):
 
 @bgm.command()
 @click.argument("uid", type=click.INT, required=False)
-@click.option("-nk", "--name-and-keyword", help="Name and keyword of subscrition")
+@click.option("-nk", "--name-and-keyword", help="Name and keyword of subscription")
 @click.option("-n", "--name", help="Name of the subscription")
 @click.option("-k", "--keyword", help="Keyword for searching")
 @click.option("-i", "--uid-new", type=click.INT, help="Uid of the subscription")

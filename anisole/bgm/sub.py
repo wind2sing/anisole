@@ -365,10 +365,10 @@ class Sub:
                     # echo all links
                     click.echo("")
                     extra_str = "(合集)" if episode == -1 else ""
-                    click.secho(f"      @{episode}{extra_str}:", fg="yellow", nl=False)
+                    click.secho(f"      -t {episode}{extra_str}:", fg="yellow", nl=False)
                     for i, item in enumerate(li):
                         click.echo("")
-                        click.secho(f"       {i:>4} {item['title']}", nl=False)
+                        click.secho(f"       {i:>4} {item['size']:>8} {item['title']}", nl=False)
 
         if nl:
             click.echo("")
